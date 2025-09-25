@@ -37,7 +37,7 @@ services:
       retries: 30
 
   app:
-    image: cat-photo-s3:latest
+    image: zakirovvadim/cat-photo-s3:latest
     container_name: cat-photo-s3
     depends_on:
       postgres:
