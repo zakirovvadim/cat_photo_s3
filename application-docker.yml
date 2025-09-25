@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  tomcat:
+    connection-timeout: 120s
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/cat
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+      file-size-threshold: 2MB
+      location: ${java.io.tmpdir}
+minio:
+  storage:
+    endpoint: http://minio:9000
+    login: minioadmin
+    password: minioadmin
