@@ -1,30 +1,36 @@
 spring:
   application:
     name: cat_photo_s3
-
   jpa:
     hibernate:
       ddl-auto: update
-
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
       file-size-threshold: 2MB
       location: ${java.io.tmpdir}
-
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/cat
     username: postgres
     password: password
 
+
 server:
   tomcat:
     connection-timeout: 120s
 
 minio:
+  photosBucket: photo
+  thumbsBucket: thumbs
+  thumbsPrefix: ""
+  coordinationBucket: coordination
   storage:
     endpoint: http://localhost:9000
     login: minioadmin
     password: minioadmin
+
+app:
+  photos
