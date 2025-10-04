@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.vadim.cat_photo_s3.entity.PhotoMetadata;
 import ru.vadim.cat_photo_s3.entity.dto.PhotoInfo;
+import ru.vadim.cat_photo_s3.entity.dto.RegisterPhotoRequestDto;
 import ru.vadim.cat_photo_s3.services.MinioService;
 import ru.vadim.cat_photo_s3.services.MinioThumbExist;
 import ru.vadim.cat_photo_s3.services.PhotoService;
@@ -144,6 +145,12 @@ public class PhotoController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + key + "\"")
                 .contentType(ct)
                 .body(body);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<PhotoMetadata> register(@RequestBody RegisterPhotoRequestDto r) {
+        PhotoMetadata metadata = photoService.register(r);
+        return ResponseEntity.status(200).body(metadata);
     }
 
     private static final Pattern DATE_RE = Pattern.compile(

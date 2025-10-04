@@ -1,12 +1,14 @@
 package ru.vadim.cat_photo_s3.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.vadim.cat_photo_s3.entity.Coordination;
 import ru.vadim.cat_photo_s3.entity.PhotoMetadata;
+import ru.vadim.cat_photo_s3.entity.dto.RegisterPhotoRequestDto;
 import ru.vadim.cat_photo_s3.repository.PhotoMetadataRepository;
 
 import java.time.LocalDate;
@@ -15,6 +17,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ru.vadim.cat_photo_s3.services.MinioService.createPath;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
@@ -26,7 +31,7 @@ public class PhotoService {
     @Transactional
     public PhotoMetadata savePhoto(MultipartFile file, MultipartFile coordination) {
         String fileName = file.getOriginalFilename();
-        String p = MinioService.createPath(fileName);
+        String p = createPath(fileName);
 
         if (checkIfExist(p)) return repository.findByPath(p);
 
@@ -72,5 +77,10 @@ public class PhotoService {
         if (path == null || path.isBlank()) return "file";
         int i = path.lastIndexOf('/');
         return (i >= 0 && i < path.length() - 1) ? path.substring(i + 1) : path;
+    }
+
+    public PhotoMetadata register(RegisterPhotoRequestDto photoInfo) {
+        log.info("get photoInfo for registry {}", photoInfo);
+        return repository.save(new PhotoMetadata(photoInfo));
     }
 }
