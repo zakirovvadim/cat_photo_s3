@@ -12,6 +12,14 @@ spring:
       file-size-threshold: 2MB
       location: ${java.io.tmpdir}
   datasource:
+    hikari:
+      maximum-pool-size: 8
+      minimum-idle: 2
+      idle-timeout: 240000     # 4 мин
+      max-lifetime: 900000     # 15 мин (делай меньше любого таймаута на стороне БД/сети)
+      keepalive-time: 90000    # 1.5 мин — «шевелить» idle-коннекты
+      validation-timeout: 5000
+      connection-timeout: 2000
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/cat
     username: postgres
