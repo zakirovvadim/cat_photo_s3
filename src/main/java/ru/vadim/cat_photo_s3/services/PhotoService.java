@@ -35,7 +35,7 @@ public class PhotoService {
         String fileName = file.getOriginalFilename();
         String p = createPath(fileName);
 
-        if (checkIfExist(p)) return repository.findByPath(p);
+        if (checkIfExist(p)) return repository.findOneByPath(p).orElseThrow();
 
         String path = minio.uploadPhoto(fileName, file);
         String coordinationName = coordination.getOriginalFilename();
@@ -55,7 +55,7 @@ public class PhotoService {
     }
 
     private boolean checkIfExist(String path) {
-        return repository.existsByPath(path);
+        return repository.existsIntByPath(path) == 1;
     }
 
     public StreamingResponseBody getTodayPhotosAsZip() {

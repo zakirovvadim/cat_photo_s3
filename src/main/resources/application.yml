@@ -1,4 +1,10 @@
 spring:
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  sql:
+    init:
+      mode: never
   main:
     lazy-initialization: true
   application:
@@ -12,18 +18,15 @@ spring:
       location: ${java.io.tmpdir}
   datasource:
     hikari:
-      maximum-pool-size: 8
-      minimum-idle: 2
-      idle-timeout: 240000     # 4 мин
-      max-lifetime: 900000     # 15 мин (делай меньше любого таймаута на стороне БД/сети)
-      keepalive-time: 90000    # 1.5 мин — «шевелить» idle-коннекты
+      maximum-pool-size: 1
+      minimum-idle: 1
+      idle-timeout: 60000
+      max-lifetime: 900000
+      keepalive-time: 90000
       validation-timeout: 5000
-      connection-timeout: 2000
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/cat
-    username: postgres
-    password: password
-
+      connection-timeout: 30000
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:/app/data/catdata.db
 
 server:
   tomcat:

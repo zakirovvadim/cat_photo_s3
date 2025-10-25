@@ -1,65 +1,58 @@
 version: "3.9"
 
 services:
-  postgres:
-    image: postgres:16
-    container_name: cat-postgres
-    environment:
-      POSTGRES_DB: cat
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d cat"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-
   minio:
-    image: quay.io/minio/minio:latest
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: cat-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BROWSER: "off"
     ports:
       - "9000:9000"   # S3 endpoint
-      - "9001:9001"   # MinIO console
+#      - "9001:9001"   # MinIO console
     volumes:
       - minio_data:/data
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/ready"]
-      interval: 5s
+      interval: 10s
       timeout: 3s
       retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.30"
+        reservations:
+          memory: 64M
 
   app:
     image: zakirovvadim/cat-photo-s3:1.0.5
     container_name: cat-photo-s3
     depends_on:
-      postgres:
-        condition: service_healthy
       minio:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://cat-postgres:5432/cat?sslmode=disable
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_URL: jdbc:sqlite:/app/data/catdata.db
       MINIO_STORAGE_ENDPOINT: http://minio:9000
       MINIO_STORAGE_LOGIN: minioadmin
       MINIO_STORAGE_PASSWORD: minioadmin
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 50MB
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 100MB
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 1
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.sqlite.JDBC
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       JAVA_TOOL_OPTIONS: >
-        -Xms16m -Xmx32m
+        -Xms16m -Xmx128m
         -XX:MaxMetaspaceSize=128m
-        -XX:MaxDirectMemorySize=8m
+        -XX:MaxDirectMemorySize=32m
         -Xss512k
         -XX:+UseSerialGC
     deploy:
@@ -67,6 +60,8 @@ services:
         limits:
           memory: 256M
           cpus: '1.0'
+    volumes:
+      - ./data:/app/data
 
 volumes:
   pgdata:
