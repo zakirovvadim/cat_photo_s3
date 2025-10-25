@@ -1,9 +1,8 @@
 spring:
+  main:
+    lazy-initialization: true
   application:
     name: cat_photo_s3
-  jpa:
-    hibernate:
-      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   servlet:
     multipart:
@@ -29,6 +28,9 @@ spring:
 server:
   tomcat:
     connection-timeout: 120s
+    threads:
+      max: 8
+      min-spare: 1
 
 minio:
   photosBucket: photo

@@ -9,10 +9,11 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import ru.vadim.cat_photo_s3.entity.Coordination;
 import ru.vadim.cat_photo_s3.entity.PhotoMetadata;
 import ru.vadim.cat_photo_s3.entity.dto.RegisterPhotoRequestDto;
+import ru.vadim.cat_photo_s3.repository.CoordinationRepository;
 import ru.vadim.cat_photo_s3.repository.PhotoMetadataRepository;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -27,6 +28,7 @@ public class PhotoService {
     private final PhotoMetadataRepository repository;
     private final MinioService minio;
     private final MinioService minioService;
+    private final CoordinationRepository coordinationRepository;
 
     @Transactional
     public PhotoMetadata savePhoto(MultipartFile file, MultipartFile coordination) {
@@ -44,9 +46,12 @@ public class PhotoService {
         meta.setTitle(fileName);
         meta.setExt("jpg");
         meta.setCreationDate(LocalDate.now());
-        meta.setCreationDateTime(ZonedDateTime.now());
-        meta.setCoordination(Coordination.builder().path(coordinationPath).creationDate(ZonedDateTime.now()).build());
-        return repository.save(meta);
+        meta.setCreationDateTime(OffsetDateTime.now());
+        Coordination coor = Coordination.builder().path(coordinationPath).creationDate(OffsetDateTime.now()).build();
+        Coordination saveCoordinaition = coordinationRepository.save(coor);
+        meta.setCoordinationId(saveCoordinaition.getId());
+        PhotoMetadata saved = repository.save(meta);
+        return repository.save(saved);
     }
 
     private boolean checkIfExist(String path) {
