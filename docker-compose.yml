@@ -28,7 +28,7 @@ services:
           memory: 64M
 
   app:
-    image: zakirovvadim/cat-photo-s3:1.0.5
+    image: zakirovvadim/cat-photo-s3:1.0.6
     container_name: cat-photo-s3
     depends_on:
       minio:
